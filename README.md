@@ -98,7 +98,8 @@ The custom policy was designed to provide the intern with the access required fo
 - Explicitly deny EC2 tag creation and deletion
 - Prevent management actions on resources tagged `Env=production`
 
-Preventing tag changes is important because an IAM user should not be able to change a production resource’s tag to `development` and bypass the access-control policy.
+```markdown 
+> **Production note:** This learning implementation uses `ec2:*` for resources tagged `Env=development`. In a production environment, this broad permission should be replaced with only the required actions, such as `ec2:StartInstances`, `ec2:StopInstances`, and `ec2:RebootInstances`.
 
 The sanitized JSON policy is available in:
 
