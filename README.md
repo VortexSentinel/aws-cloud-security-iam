@@ -164,9 +164,11 @@ The successful tests confirmed that the tag-based access controls behaved as int
 
 ## Project Images
 
+> **Security notice:** Sensitive details, including AWS account information, sign-in details, instance identifiers, public IP addresses, and DNS names, were removed before publication.
+
 ### 1. EC2 Resource Tags
 
-images/01-ec2-resource-tags.png
+![EC2 development and production resource tags](images/01-ec2-resource-tags.png)
 
 Development and production EC2 resources are separated using the `Env` tag.
 
@@ -174,7 +176,7 @@ Development and production EC2 resources are separated using the `Env` tag.
 
 ### 2. IAM JSON Policy
 
-images/02-iam-json-policy.png
+![Custom IAM JSON policy](images/02-iam-json-policy.png)
 
 The custom JSON policy controls EC2 actions according to the resource’s environment tag.
 
@@ -182,7 +184,7 @@ The custom JSON policy controls EC2 actions according to the resource’s enviro
 
 ### 3. AWS Account Alias
 
-images/03-aws-account-alias-redacted.png
+![Redacted AWS account alias configuration](images/03-aws-account-alias-redacted.png)
 
 An AWS account alias provides a more convenient console sign-in address. Sensitive information has been redacted.
 
@@ -190,7 +192,7 @@ An AWS account alias provides a more convenient console sign-in address. Sensiti
 
 ### 4. IAM User Sign-In
 
-images/04-iam-user-sign-in-redacted.png
+![Redacted IAM user sign-in configuration](images/04-iam-user-sign-in-redacted.png)
 
 The IAM user signed in using restricted credentials. Identifying and credential-related information has been redacted.
 
@@ -198,7 +200,7 @@ The IAM user signed in using restricted credentials. Identifying and credential-
 
 ### 5. Production Access Denied
 
-images/05-production-access-denied-redacted.png
+![Production EC2 instance access denied](images/05-production-access-denied-redacted.png)
 
 The attempt to stop the production instance was denied because the resource was outside the intern’s permitted environment.
 
@@ -206,7 +208,7 @@ The attempt to stop the production instance was denied because the resource was 
 
 ### 6. Development Action Allowed
 
-images/06-development-instance-stopped-redacted.png
+![Development EC2 instance stopped successfully](images/06-development-instance-stopped-redacted.png)
 
 The development instance was stopped successfully, confirming that the policy allowed the required action on development resources.
 
