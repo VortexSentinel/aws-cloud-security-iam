@@ -367,10 +367,10 @@ These additions go beyond the original project deliverables and better demonstra
 
 ### Rajnish Jha
 
-Aspiring Cloud and DevOps Engineer focused on AWS, Linux, Docker, Git, security, and automation.
+Aspiring Cloud and DevOps Engineer focused on AWS, Linux, Docker, Git, cloud security, and automation.
 
 ### Connect With Me
 
-- LinkedIn: <https://www.linkedin.com/in/rajnish-k-jha>
-- GitHub: <https://github.com/VortexSentinel>
-- Email: <rajnish96jha@gmail.com>
+- [LinkedIn](https://www.linkedin.com/in/rajnish-k-jha)
+- [GitHub](https://github.com/VortexSentinel)
+- [Email](mailto:rajnish96jha@gmail.com)
