@@ -52,7 +52,9 @@ AWS Account
 
 ## AWS Services Used
 
-| AWS service | Purpose |
+## AWS Services and Tools Used
+
+| Service or tool | Purpose |
 |---|---|
 | AWS Identity and Access Management | Identity, permission, group, and policy management |
 | Amazon EC2 | Development and production compute resources |
@@ -89,7 +91,7 @@ The IAM policy evaluates the `Env` tag before allowing the IAM user to perform E
 
 ## IAM Policy Design
 
-The custom policy was designed to provide the intern with the access required for development work without granting control over production resources.
+The custom policy was designed to provide the intern with environment-restricted EC2 access for development work without granting equivalent control over production resources.
 
 ### Policy behavior
 
@@ -278,7 +280,7 @@ This project provided practical experience with:
 - IAM policy statements and conditions
 - Tag-based access control
 - EC2 resource tagging
-- Least-privilege permissions
+- Least-privilege principles and opportunities for permission refinement
 - Explicit deny behavior
 - Development and production separation
 - Access-control testing
