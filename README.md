@@ -42,8 +42,7 @@ AWS Account
     │   └── Deny EC2 tag creation and deletion
     │
     └── IAM User Group: nextwork-dev-group
-        │   └── Policy attached: NextWorkDevEnvironmentPolicy
-        │
+        ├── Policy attached: NextWorkDevEnvironmentPolicy
         └── IAM User: nextwork-dev-day3 (intern)
 ```
 
