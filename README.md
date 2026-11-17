@@ -4,7 +4,7 @@
 
 Implemented a tag-based access-control system in AWS using IAM users, user groups, custom JSON policies, and Amazon EC2 resource tags.
 
-The project separates development and production EC2 resources using the `Env` tag. An IAM user representing an intern was allowed to manage development resources while being prevented from modifying production resources.
+The project separates development and production EC2 resources using the `Env` tag. An IAM user representing an intern was allowed to manage development resources, while production resources were never granted to that user.
 
 The final permission test confirmed that the intern could stop the development instance but could not stop the production instance.
 
@@ -17,9 +17,9 @@ The final permission test confirmed that the intern could stop the development i
 - Create a custom IAM policy using JSON
 - Apply permissions through an IAM user group
 - Create an IAM user with restricted access
-- Test access from the IAM user’s perspective
+- Test access from the IAM user's perspective
 - Protect production resources from unauthorized actions
-- Apply the principle of least privilege
+- Introduce least-privilege concepts and identify where permissions can be tightened
 
 ---
 
@@ -29,23 +29,22 @@ The final permission test confirmed that the intern could stop the development i
 AWS Account
 │
 ├── Amazon EC2
-│   ├── Development Instance
+│   ├── Development Instance (nextwork-dev-day3)
 │   │   └── Tag: Env = development
 │   │
-│   └── Production Instance
+│   └── Production Instance (nextwork-prod-day3)
 │       └── Tag: Env = production
 │
 └── AWS IAM
-    ├── IAM User
-    │   └── Intern
+    ├── Custom IAM Policy: NextWorkDevEnvironmentPolicy
+    │   ├── Allow EC2 actions on resources tagged Env=development
+    │   ├── Allow EC2 describe actions
+    │   └── Deny EC2 tag creation and deletion
     │
-    ├── IAM User Group
-    │   └── Development Group
-    │
-    └── Custom IAM Policy
-        ├── Allow EC2 actions on development resources
-        ├── Allow EC2 describe actions
-        └── Deny EC2 tag creation and deletion
+    └── IAM User Group: nextwork-dev-group
+        │   └── Policy attached: NextWorkDevEnvironmentPolicy
+        │
+        └── IAM User: nextwork-dev-day3 (intern)
 ```
 
 ---
@@ -63,11 +62,12 @@ AWS Account
 ## Security Concepts Demonstrated
 
 - Identity and Access Management
-- Principle of least privilege
+- Least-privilege concepts (and where this implementation can be tightened)
 - Tag-based access control
 - Environment separation
 - Group-based permission management
 - Explicit deny statements
+- Implicit deny (default deny) behavior
 - IAM policy evaluation
 - Production-resource protection
 - Permission testing
@@ -89,24 +89,50 @@ The IAM policy evaluates the `Env` tag before allowing the IAM user to perform E
 
 ## IAM Policy Design
 
-The custom policy was designed to provide the intern with environment-restricted EC2 access for development work without granting equivalent control over production resources.
+The custom policy was designed to give the intern EC2 access for development work without granting equivalent control over production resources.
 
 ### Policy behavior
 
-- Allow EC2 management actions on resources tagged `Env=development`
+- Allow EC2 actions on resources tagged `Env=development`
 - Allow EC2 describe actions so resources can be viewed in the console
 - Explicitly deny EC2 tag creation and deletion
-- Prevent management actions on resources tagged `Env=production`
+- Production resources are not explicitly denied. They are simply never allowed, so AWS denies them by default
 
+### Policy JSON
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ec2:*",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "ec2:ResourceTag/Env": "development"
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": "ec2:Describe*",
+      "Resource": "*"
+    },
+    {
+      "Effect": "Deny",
+      "Action": ["ec2:DeleteTags", "ec2:CreateTags"],
+      "Resource": "*"
+    }
+  ]
+}
 ```
-Preventing tag changes is important because an IAM user should not be able to change a production resource’s tag to `development` and bypass the access-control policy.
 
-> **Production note:** This learning implementation uses `ec2:*` for resources tagged `Env=development`. In a production environment, this broad permission should be replaced with only the required actions, such as `ec2:StartInstances`, `ec2:StopInstances`, and `ec2:RebootInstances`.
+Preventing tag changes is important because an IAM user should not be able to change a production resource's tag to `development` and bypass the access-control policy.
 
-The sanitized JSON policy is available here:
+> **Production note:** This learning implementation uses `ec2:*` for resources tagged `Env=development`. In a production environment, replace it with only the required actions, such as `ec2:StartInstances`, `ec2:StopInstances`, and `ec2:RebootInstances`.
 
-[`configurations/development-access-policy.json`](configurations/development-access-policy.json)
-```
+The sanitized policy file is also available here: [`configurations/development-access-policy.json`](configurations/development-access-policy.json)
 
 ---
 
@@ -123,7 +149,7 @@ The tags provide the resource context used by the IAM policy.
 
 ### 2. Custom IAM Policy
 
-A multi-statement JSON policy was created to control EC2 access according to resource tags.
+A multi-statement JSON policy (`NextWorkDevEnvironmentPolicy`) was created to control EC2 access according to resource tags.
 
 The policy combines:
 
@@ -140,13 +166,13 @@ Sensitive account and sign-in information has been removed from the public scree
 
 ### 4. IAM User Group
 
-A development user group was created, and the custom IAM policy was attached to the group.
+A user group (`nextwork-dev-group`) was created, and the custom IAM policy was attached to the group.
 
-Users added to this group inherit the group’s permissions.
+Users added to this group inherit the group's permissions.
 
 ### 5. IAM User
 
-An IAM user representing an intern was created and added to the development user group.
+An IAM user representing an intern was created and added to the user group.
 
 Testing was performed while signed in as this restricted IAM user.
 
@@ -159,7 +185,7 @@ The policy was validated by attempting to stop both EC2 instances.
 | Stop production instance | Denied | Denied |
 | Stop development instance | Allowed | Allowed |
 
-The successful tests confirmed that the tag-based access controls behaved as intended.
+The results confirmed that the tag-based access controls behaved as intended.
 
 ---
 
@@ -179,7 +205,7 @@ Development and production EC2 resources are separated using the `Env` tag.
 
 ![Custom IAM JSON policy](images/02-iam-json-policy.png)
 
-The custom JSON policy controls EC2 actions according to the resource’s environment tag.
+The custom JSON policy controls EC2 actions according to the resource's environment tag.
 
 ---
 
@@ -203,7 +229,7 @@ The IAM user signed in using restricted credentials. Identifying and credential-
 
 ![Production EC2 instance access denied](images/05-production-access-denied-redacted.png)
 
-The attempt to stop the production instance was denied because the resource was outside the intern’s permitted environment.
+The attempt to stop the production instance was denied because the policy does not allow any action on resources outside the intern's permitted environment.
 
 ---
 
@@ -240,7 +266,7 @@ This confirmed that the user could manage resources tagged `Env=development`.
 - Development and production environments separated using tags
 - Permissions assigned through an IAM user group
 - Tag-based policy conditions applied
-- Production-management actions restricted
+- Production management actions not granted (denied by default)
 - Tag modification explicitly denied
 - Permissions tested using the restricted IAM user
 - Sensitive identifiers removed from public screenshots
@@ -260,7 +286,7 @@ The policy required separate statements for:
 - Read-only EC2 visibility
 - Explicit denial of tag modifications
 
-Testing the policy from the IAM user’s account helped demonstrate how AWS evaluates allow and deny statements.
+Testing the policy from the IAM user's account helped demonstrate how AWS evaluates allow and deny statements.
 
 ### Validating Tag-Based Permissions
 
@@ -280,7 +306,7 @@ This project provided practical experience with:
 - Tag-based access control
 - EC2 resource tagging
 - Least-privilege principles and opportunities for permission refinement
-- Explicit deny behavior
+- Explicit deny versus implicit deny behavior
 - Development and production separation
 - Access-control testing
 
